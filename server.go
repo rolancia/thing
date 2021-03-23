@@ -21,9 +21,9 @@ type Server struct {
 
 func NewServer(ctx context.Context, frameConfig FrameConfig, eventHandler EventHandler, postActHandler PostActionHandler) *Server {
 	server := Server{
-		context:      ctx,
-		frameConf:    frameConfig,
-		eventHandler: eventHandler,
+		context:           ctx,
+		frameConf:         frameConfig,
+		eventHandler:      eventHandler,
 		postActionHandler: postActHandler,
 	}
 
@@ -135,6 +135,7 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 				}
 			}()
 
+			svr.eventHandler.OnConnected(uconn)
 			b, err := uconn.ReadFrame()
 			if err != nil {
 				uconn.Close()
@@ -183,9 +184,12 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 
 func (svr *Server) handlePostAct(act PostAction, conn *UserConn) {
 	switch act {
-	case PostActionNone: svr.postActionHandler.OnActionNone(act, conn)
-	case PostActionClose: svr.postActionHandler.OnActionClose(act, conn)
-	case PostActionBlock: svr.postActionHandler.OnActionBlock(act, conn)
+	case PostActionNone:
+		svr.postActionHandler.OnActionNone(act, conn)
+	case PostActionClose:
+		svr.postActionHandler.OnActionClose(act, conn)
+	case PostActionBlock:
+		svr.postActionHandler.OnActionBlock(act, conn)
 	}
 }
 

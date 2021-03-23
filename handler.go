@@ -36,6 +36,7 @@ func NewFatError(err error, act ErrorAction, conn *UserConn) *FatError {
 
 type EventHandler interface {
 	// context를 리턴하면 UserConn의 context가 대체됨
+	OnConnected(conn *UserConn) (context.Context, PostAction)
 	OnJoin(conn *UserConn, firstMP *DefaultMessagePacket) (context.Context, PostAction)
 	OnMessage(conn *UserConn, mp *DefaultMessagePacket) PostAction
 	OnBeforeClose(conn *UserConn)
