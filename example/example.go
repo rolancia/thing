@@ -19,6 +19,10 @@ func Example() {
 type exEventHandler struct {
 }
 
+func (h *exEventHandler) OnConnected(conn *server.UserConn) (context.Context, server.PostAction) {
+	return conn.Context(), server.PostActionNone
+}
+
 // called first packet received
 func (h *exEventHandler) OnJoin(conn *server.UserConn, firstMP *server.DefaultMessagePacket) (context.Context, server.PostAction) {
 	// do login or ...
@@ -39,7 +43,7 @@ func (h *exEventHandler) OnMessage(conn *server.UserConn, mp *server.DefaultMess
 		return server.PostActionNone
 	} else {
 		// this will call 'OnErrorPrint'
-		server.GetLandfill(conn.Context())<- server.NewFatError(errors.New("err!"), server.ErrorActionPrint, conn)
+		server.GetLandfill(conn.Context()) <- server.NewFatError(errors.New("err!"), server.ErrorActionPrint, conn)
 	}
 
 	return server.PostActionClose
