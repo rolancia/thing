@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rolancia/kolancia/server"
+	"github.com/rolancia/thing"
 )
 
 func Example() {
