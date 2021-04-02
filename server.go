@@ -164,22 +164,30 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 					return
 				}
 
-				err = ants.Submit(func() {
-					mp := DefaultMessagePacket{}
-					err := mp.Deserialize(b)
-					if err != nil {
-						svr.eventHandler.OnParsingFailed(uconn, b)
-						return
-					}
-
-					postAct := svr.eventHandler.OnMessage(uconn, &mp)
-					svr.handlePostAct(postAct, uconn)
-				})
+				if uconn.async {
+					_ = ants.Submit(func() {
+						svr.handleMessage(uconn, b)
+					})
+				} else {
+					svr.handleMessage(uconn, b)
+				}
 			}
 		}(conn)
 	}
 
 	return nil
+}
+
+func (svr *Server) handleMessage(uconn *UserConn, b []byte) {
+	mp := DefaultMessagePacket{}
+	err := mp.Deserialize(b)
+	if err != nil {
+		svr.eventHandler.OnParsingFailed(uconn, b)
+		return
+	}
+
+	postAct := svr.eventHandler.OnMessage(uconn, &mp)
+	svr.handlePostAct(postAct, uconn)
 }
 
 func (svr *Server) handlePostAct(act PostAction, conn *UserConn) {

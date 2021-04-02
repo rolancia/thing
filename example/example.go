@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rolancia/thing"
+	"time"
 )
 
 func Example() {
@@ -20,6 +21,9 @@ type exEventHandler struct {
 }
 
 func (h *exEventHandler) OnConnected(conn *server.UserConn) (context.Context, server.PostAction) {
+	conn.Conn().SetDeadline(time.Now().Add(30 * time.Second))
+	conn.Async = false
+
 	return conn.Context(), server.PostActionNone
 }
 

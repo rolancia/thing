@@ -9,6 +9,7 @@ import (
 
 type UserConn struct {
 	goframe.FrameConn
+	Async bool
 
 	context context.Context
 
