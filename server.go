@@ -3,13 +3,11 @@ package server
 import (
 	"context"
 	"encoding/binary"
-	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"github.com/smallnest/goframe"
 	"log"
 	"net"
 	"runtime/debug"
-	"time"
 )
 
 type Server struct {
@@ -93,20 +91,6 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 		}
 	}()
 
-	// 패닉 핸들러 작동여부 확인
-	ants.Submit(func() {
-		panic("Panic check: defaultPool")
-	})
-	errGRPool.Submit(func() {
-		panic("Panic check: errGRPool")
-	})
-	closingPool.Submit(func() {
-		panic("Panic check: closingPool")
-	})
-
-	time.Sleep(3 * time.Second)
-	printPanicHandlerOk()
-
 	// 시작
 	l, err := net.Listen("tcp", addr)
 	if nil != err {
@@ -114,7 +98,7 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 	}
 	defer l.Close()
 
-	log.Println("listening ", addr)
+	log.Println("listening", addr)
 	for {
 		conn, err := l.Accept()
 		if nil != err {
@@ -164,7 +148,7 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 					return
 				}
 
-				if uconn.async {
+				if uconn.Async {
 					_ = ants.Submit(func() {
 						svr.handleMessage(uconn, b)
 					})
@@ -191,25 +175,18 @@ func (svr *Server) handleMessage(uconn *UserConn, b []byte) {
 }
 
 func (svr *Server) handlePostAct(act PostAction, conn *UserConn) {
-	switch act {
-	case PostActionNone:
-		svr.postActionHandler.OnActionNone(act, conn)
-	case PostActionClose:
-		svr.postActionHandler.OnActionClose(act, conn)
-	case PostActionBlock:
-		svr.postActionHandler.OnActionBlock(act, conn)
-	}
+	svr.postActionHandler.OnPostAction(act, conn)
 }
 
 func DefaultCodec() FrameConfig {
 	encoder := goframe.EncoderConfig{
-		ByteOrder:                       binary.BigEndian,
+		ByteOrder:                       binary.LittleEndian,
 		LengthFieldLength:               4,
 		LengthAdjustment:                0,
 		LengthIncludesLengthFieldLength: false,
 	}
 	decoder := goframe.DecoderConfig{
-		ByteOrder:           binary.BigEndian,
+		ByteOrder:           binary.LittleEndian,
 		LengthFieldOffset:   0,
 		LengthFieldLength:   4,
 		LengthAdjustment:    0,
@@ -217,14 +194,4 @@ func DefaultCodec() FrameConfig {
 	}
 
 	return FrameConfig{encoder, decoder}
-}
-
-func printPanicHandlerOk() {
-	fmt.Println("-------------------------------------")
-	fmt.Println("-------------------------------------")
-	fmt.Println("-------------------------------------")
-	fmt.Println("-------------------------------------")
-	fmt.Println("-------------------------------------")
-	fmt.Println("-------------------------------------")
-	fmt.Println("-----SERVER PANIC HANDLERS WORK------")
 }

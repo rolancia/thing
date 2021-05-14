@@ -8,8 +8,6 @@ type PostAction uint8
 
 const (
 	PostActionNone PostAction = iota
-	PostActionClose
-	PostActionBlock
 )
 
 type ErrorAction uint8
@@ -47,7 +45,5 @@ type EventHandler interface {
 }
 
 type PostActionHandler interface {
-	OnActionNone(act PostAction, conn *UserConn)
-	OnActionClose(act PostAction, conn *UserConn)
-	OnActionBlock(act PostAction, conn *UserConn)
+	OnPostAction(act PostAction, conn *UserConn)
 }
