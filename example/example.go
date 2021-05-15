@@ -21,7 +21,7 @@ type exEventHandler struct {
 }
 
 func (h *exEventHandler) OnConnected(conn *server.UserConn) (context.Context, server.PostAction) {
-	conn.Conn().SetDeadline(time.Now().Add(30 * time.Second))
+	conn.Conn().SetDeadline(time.Now().Add(300 * time.Second))
 	conn.Async = false
 	fmt.Println("OnConnected")
 
@@ -33,6 +33,7 @@ func (h *exEventHandler) OnJoin(conn *server.UserConn, firstMP *server.DefaultMe
 	// do login or ...
 	authenticatedCtx := context.WithValue(conn.Context(), "id", "pizzazzang")
 	fmt.Println("OnJoin")
+	fmt.Println(string(firstMP.Payload))
 
 	return authenticatedCtx, server.PostActionNone
 }

@@ -119,7 +119,13 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 				}
 			}()
 
-			svr.eventHandler.OnConnected(uconn)
+			newCtx, postAct := svr.eventHandler.OnConnected(uconn)
+			uconn.context = newCtx
+			svr.handlePostAct(postAct, uconn)
+			if uconn.closed {
+				return
+			}
+
 			b, err := uconn.ReadFrame()
 			if err != nil {
 				uconn.Close()
@@ -133,7 +139,7 @@ func Serve(svr *Server, addr string, internalMode ErrorAction) error {
 				return
 			}
 
-			newCtx, postAct := svr.eventHandler.OnJoin(uconn, &mp)
+			newCtx, postAct = svr.eventHandler.OnJoin(uconn, &mp)
 			uconn.context = newCtx
 
 			svr.handlePostAct(postAct, uconn)
