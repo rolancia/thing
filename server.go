@@ -176,7 +176,8 @@ func (svr *Server) handleMessage(uconn *UserConn, b []byte) {
 		return
 	}
 
-	postAct := svr.eventHandler.OnMessage(uconn, &mp)
+	ctx, postAct := svr.eventHandler.OnMessage(uconn, &mp)
+	uconn.context = ctx
 	svr.handlePostAct(postAct, uconn)
 }
 
