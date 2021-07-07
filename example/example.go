@@ -39,19 +39,19 @@ func (h *exEventHandler) OnJoin(conn *server.UserConn, firstMP *server.DefaultMe
 }
 
 // called a packet received except first that
-func (h *exEventHandler) OnMessage(conn *server.UserConn, mp *server.DefaultMessagePacket) server.PostAction {
+func (h *exEventHandler) OnMessage(conn *server.UserConn, mp *server.DefaultMessagePacket) (context.Context, server.PostAction) {
 	payload := mp.Payload
 
 	if payload != nil {
 		// do dispatch or ...
 		fmt.Println("OnMessage:", string(mp.Payload))
-		return server.PostActionNone
+		return conn.Context(), server.PostActionNone
 	} else {
 		// this will call 'OnErrorPrint'
 		server.GetLandfill(conn.Context()) <- server.NewFatError(errors.New("err!"), server.ErrorActionPrint, conn)
 	}
 
-	return server.PostActionNone
+	return conn.Context(), server.PostActionNone
 }
 
 // called before closing connection
