@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"github.com/panjf2000/ants/v2"
-	"github.com/smallnest/goframe"
+	"github.com/rolancia/goframe"
 	"log"
 	"net"
 	"runtime/debug"
